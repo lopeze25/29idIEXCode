@@ -1,0 +1,53 @@
+
+import os
+from datetime import date
+from os.path import join
+
+#  
+class ID:
+    def _mode_to_state(mode):
+        if mode == 0:
+            return "RCP"
+        elif mode == 1:
+            return "LCP"
+        elif mode == 2:
+            return "V"
+        elif mode == 3:
+            return "H"
+        else:
+            return -1
+ 
+class test:
+    def __init__(self):
+        self.grt_name = ["MEG"]
+        self.id_mode = [0]
+        self.fit_coefs = [1.1, 2.2, 3.3, 4.4] 
+
+    def write_calibration(self, **kwargs):
+        kwargs.setdefault('debug', False)
+        kwargs.setdefault('filename', "test.txt")
+        kwargs.setdefault('path', ".")
+        kwargs.setdefault('bkpnt_eV', 3800)
+        kwargs.setdefault('polynumber', 3)
+        kwargs.setdefault('Id_state', 0)
+
+        bkpnt_eV = kwargs['bkpnt_eV']
+        grt = self.grt_name[0]
+        ID_state = ID._mode_to_state(self.id_mode[kwargs['Id_state']])
+        coefs = list(self.fit_coefs[:kwargs['polynumber']])
+        entry = {grt: {ID_state: [[bkpnt_eV, coefs]]}}
+
+        # fpath = join(kwargs['path'], kwargs['filename'])
+        fpath = r"C:\Users\29iduser\Documents\GitHub\test.txt"
+        if kwargs['debug']:
+            print('write_calibration fpath:', fpath)
+            print('ID calibration:', entry)
+
+        print('\nSaving calibration to:', fpath)
+        with open(fpath, "a+") as f:
+            f.write('\n======= ' + date.today().isoformat() + ':\n')
+            f.write(str(entry))  
+            f.write('\n')
+
+cal = test()
+cal.write_calibration(debug=True)
