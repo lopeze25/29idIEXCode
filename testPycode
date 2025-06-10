@@ -1,0 +1,82 @@
+def main():
+
+
+
+
+    class testCal:
+        def __init__(self):
+            self.mono_max = [1800, 2100, 2500, 3000, 3500]
+            self.id_sp_eV = [500, 520, 540, 560, 580]
+            self.grt_name = ["MEG"]
+            self.id_mode = [0]  #
+            self.fit_coefs = [1.0, 2.0]
+
+        def write(new_entry, **kwargs):
+            """
+            Appends/Writes a new calibration to the calibration file
+            Args: takes any dict(entry)
+            kwargs: 
+            filename (str)
+            path(str)
+        debug(bool) 
+            """
+            kwargs.setdefault('filename', "Dict_IDCal.txt")
+            kwargs.setdefault('path', ".")
+            kwargs.setdefault('debug', False)
+            filename = kwargs.get('filename', "Dict_IDCal.txt")
+            path = kwargs.get('path', ".")
+            debug = kwargs.get('debug', False)
+
+            fpath = join(path, filename)
+            #Make sure directory is created if it doesnt exist
+            os.makedirs(path, exist_ok=True)
+
+            with open(fpath, "a+") as f:
+                f.write("\n======= " + date.today() + ": " + kwargs.get("comment", "") + "\n")
+                f.write(str(new_entry))
+                f.write("\n")
+            if kwargs['debug']:
+                print('write_calibration fpath:',fpath)
+                print('ID calibration:',new_entry)
+
+
+        def read(self, fpath, **kwargs):
+            """
+            Reads any dictionary entry from a file .
+            Args:
+            fpath(str), Path to the desired file to read from
+            kwargs:
+            index, -1 to get the last entry
+            comment,search by comment
+            date,search by date
+            debug
+            Return desired entry
+            """
+            #Set the last entry by default
+            kwargs.setdefault("index", -1)
+            kwargs.setdefault("comment", None)
+            kwargs.setdefault("date", None)
+            kwargs.setdefault("debug", False)
+            index = kwargs.get("index")
+            comment = kwargs.get("comment")
+            date = kwargs.get("date")
+            debug = kwargs.get("debug")
+            #List of all entries
+            entries = []
+            header = None
+            block = []
+  
+            with open(fpath, 'r') as f:
+                for line in f:
+                    #This takes the entire line + data + comment and ends at the newline 
+                    if line.startswith("======="):
+                        first_brace_index = block.rfind("{")
+                        header = block[0:first_brace_index-1]
+                        combined_lines = ''
+                        index = 0
+                        while index < first_brace_index:
+                            for l in block:
+                                combined_lines += l.strip()
+                            index += 1
+                            entries.append((header, combined_lines))
+            #Stores the entire line into the header and remove whitespace 
